@@ -10,7 +10,7 @@ router.post('/logout', logout);
 router.put('/update-profile', protectRoute, updateProfile);
 
 // check
-router.get('/check', protectRoute, (req, res) => {
+router.get('/check-auth', protectRoute, (req, res) => {
    try {
        res.status(200).json({ message: 'User is logged in', user: req.user });
    } catch (error) {
