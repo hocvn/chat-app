@@ -1,4 +1,4 @@
-import { useAuthStore } from '../hooks/useAuthStore'
+import { useAuthStore } from '../store/useAuthStore'
 import { Camera, Mail, User } from 'lucide-react'
 import { useState } from 'react'
 
