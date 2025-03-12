@@ -2,7 +2,7 @@ import User from '../models/user.model.js';
 import cloudinary from '../lib/cloudinary.js';
 import bcrypt from 'bcryptjs';
 
-import { generateToken} from '../lib/utils.js';
+import { generateToken } from '../lib/utils.js';
 
 export const signup = async (req, res) => {
     const { username, fullname, email, password } = req.body;
@@ -60,12 +60,12 @@ export const signup = async (req, res) => {
 }
 
 export const login = async (req, res) => {
+    const { username, password } = req.body;
     try {
-        const { username, password } = req.body;
         const user = await User.findOne({ username });
 
         if (!user) {
-            return res.status(404).json({ message: 'Invalid credentials' });
+            return res.status(400).json({ message: 'Invalid credentials' });
         }
 
         const isPasswordCorrect = await bcrypt.compare(password, user.password);
@@ -92,15 +92,14 @@ export const login = async (req, res) => {
 
 export const logout = async (req, res) => {
     try {
-        res.clearCookie('token');
-        res.status(200).json({ message: 'Logout successful' });
+        res.cookie("token", "", { maxAge: 0 });
+    res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
         console.log("Error in logout controller", error.message );
         res.status(500).json({ message: error.message });
         return;
     }
 }
-
 
 export const updateProfile = async (req, res) => {
     try {
@@ -122,4 +121,13 @@ export const updateProfile = async (req, res) => {
         res.status(500).json({ message: error.message });
         return;
     }
+}
+
+export const checkAuth = async (req, res) => {
+    try {
+        res.status(200).json(req.user);
+    } catch (error) {
+        console.log("Error in checkAuth route", error.message);
+        res.status(500).json({ message: error.message });
+    } 
 }

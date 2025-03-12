@@ -49,7 +49,7 @@ const LoginPage = () => {
                     <input
                       type="text"
                       className={`input input-bordered w-full pl-10`}
-                      placeholder="johndoe"
+                      placeholder="Username"
                       value={formData.username}
                       onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                     />
@@ -65,12 +65,14 @@ const LoginPage = () => {
                       <Lock className="h-5 w-5 text-base-content/40" />
                     </div>
                     <input
-                      type={showPassword ? "text" : "password"}
-                      className={`input input-bordered w-full pl-10`}
-                      placeholder="••••••••"
-                      value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    />
+						type={showPassword ? "text" : "password"}
+						className="input input-bordered w-full pl-10 appearance-none"
+						placeholder="••••••••"
+						value={formData.password}
+						onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+						autoComplete="new-password"
+					/>
+
                     <button
                       type="button"
                       className="absolute inset-y-0 right-0 pr-3 flex items-center"
