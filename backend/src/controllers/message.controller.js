@@ -1,6 +1,7 @@
 import User from '../models/user.model.js';
 import Message from '../models/message.model.js';
 import cloudinary from '../lib/cloudinary.js';
+import { getReceiverSocketId, io } from '../lib/socket.js';
 
 export const getUsersForSidebar = async (req, res) => {
     try {
@@ -41,8 +42,8 @@ export const sendMessage = async (req, res) => {
         let imageUrl;
         if (image) {
             // Upload to cloudinary
-            const uploadedResponse = await cloudinary.uploader.upload(image);
-            imageUrl = uploadedResponse.secure_url;
+            const uploadResponse = await cloudinary.uploader.upload(image);
+            imageUrl = uploadResponse.secure_url;
         }
 
         const newMessage = new Message({
@@ -52,15 +53,14 @@ export const sendMessage = async (req, res) => {
             image: imageUrl
         });
 
-        if (!text && !imageUrl) {
-            return res.status(400).json({ message: 'Text or image is required' });
-        }
-
-        if (!newMessage) {
-            return res.status(400).json({ message: 'Message not created' });
-        }
-
         await newMessage.save();
+
+        // Send notification to receiver if online
+        const receiverSocketId = getReceiverSocketId(receiverId); 
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit('newMessage', newMessage);
+        }
+
         res.status(201).json(newMessage);
 
     } catch (error) {
