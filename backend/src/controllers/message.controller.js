@@ -42,8 +42,8 @@ export const sendMessage = async (req, res) => {
         let imageUrl;
         if (image) {
             // Upload to cloudinary
-            const uploadedResponse = await cloudinary.uploader.upload(image);
-            imageUrl = uploadedResponse.secure_url;
+            const uploadResponse = await cloudinary.uploader.upload(image);
+            imageUrl = uploadResponse.secure_url;
         }
 
         const newMessage = new Message({
@@ -52,14 +52,6 @@ export const sendMessage = async (req, res) => {
             text: text,
             image: imageUrl
         });
-
-        if (!text && !imageUrl) {
-            return res.status(400).json({ message: 'Text or image is required' });
-        }
-
-        if (!newMessage) {
-            return res.status(400).json({ message: 'Message not created' });
-        }
 
         await newMessage.save();
 

@@ -4,6 +4,8 @@ import { Send, Image, X } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useChatStore } from "../store/useChatStore";
 
+const MAX_FILE_SIZE = 1024 * 1024; // 1MB
+
 const MessageInput = () => {
     const [text, setText] = useState("");
     const [imagePreview, setImagePreview] = useState(null);
@@ -14,6 +16,12 @@ const MessageInput = () => {
         const file = e.target.files[0];
         if (!file.type.startsWith("image/")) {
             return toast.error("Please select an image file");
+        }
+
+        // Check file size
+        if (file.size > MAX_FILE_SIZE) {
+            toast.error("File size is too large. Max size is 1MB")
+            return;
         }
 
         const reader = new FileReader();
@@ -39,7 +47,7 @@ const MessageInput = () => {
             });
             setText("");
             setImagePreview(null);
-            fileInputRef.current.value = "";
+            if (fileInputRef.current) fileInputRef.current.value = "";
         } catch (error) {
             console.log("Failed to send message", error);
             toast.error("Failed to send message");
@@ -104,7 +112,7 @@ const MessageInput = () => {
                 {/* Send button */}
                 <button
                     type="submit"
-                    className="btn btn-sm btn-circle"
+                    className="btn sm:flex btn-circle"
                     disabled={!text.trim() && !imagePreview}
                     >
                     <Send size={22} />
