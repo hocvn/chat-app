@@ -20,7 +20,7 @@ const __dirname = path.resolve();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-    origin: process.env.CLIENT_URL,
+    origin: "*",
     credentials: true,
 }));
 
