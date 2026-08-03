@@ -1,7 +1,7 @@
 # Chat App  
 A modern fullstack chat application built with React, Vite, Node.js, Express, Socket.io, MongoDB, and Tailwind CSS. Real-time messaging, authentication, and a beautiful UI.
 
-Clone from this [project](https://github.com/burakorkmez/fullstack-chat-app), repo of `burakorkmez`
+Inspired from this [project](https://github.com/burakorkmez/fullstack-chat-app), repo of `burakorkmez`
 
 ## Features
 - Real-time chat with Socket.io
