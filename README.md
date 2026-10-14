@@ -52,7 +52,7 @@ npm run dev
 **4. Access the App** 
 
 - Frontend: http://localhost:5173  
-- Backend API: http://localhost:5000  
+- Backend API: http://localhost:3000  
 ## Environment Variables
 Configure your backend `.env` file with:
 
