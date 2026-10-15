@@ -12,6 +12,7 @@ import cors from 'cors';
 import path from 'path';
 
 import { app, server } from './lib/socket.js';
+import { corsOptions } from './lib/cors.js';
 
 
 dotenv.config();
@@ -19,28 +20,9 @@ dotenv.config();
 const PORT = process.env.PORT;
 const __dirname = path.resolve();
 
-const allowedOrigins = [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    process.env.CLIENT_URL,
-].filter(Boolean);
-
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({
-    origin: (origin, callback) => {
-        if (!origin) return callback(null, true);
-        if (
-            process.env.NODE_ENV !== 'production' ||
-            allowedOrigins.includes(origin) ||
-            allowedOrigins.includes('*')
-        ) {
-            return callback(null, true);
-        }
-        return callback(new Error('Not allowed by CORS'));
-    },
-    credentials: true,
-}));
+app.use(cors(corsOptions));
 
 app.get('/check-health', checkHealth);
 app.get('/api/check-health', checkHealth);
