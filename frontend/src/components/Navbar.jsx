@@ -14,9 +14,7 @@ const Navbar = () => {
           {/* Logo & Brand */}
           <div className="flex items-center gap-6">
             <Link to="/" className="flex items-center gap-2.5 hover:opacity-80 transition-all">
-              <div className="size-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-sm">
-                <MessageSquare className="w-5 h-5" />
-              </div>
+              <img src="/logo.svg" alt="Chattap Logo" className="size-9 rounded-xl shadow-sm" />
               <span className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 Chattap
               </span>
@@ -91,7 +89,6 @@ const Navbar = () => {
                   to="/signup"
                   className="btn btn-sm btn-primary gap-1.5 shadow-sm shadow-primary/20"
                 >
-                  <Sparkles className="size-3.5" />
                   <span>Get Started</span>
                 </Link>
               </div>

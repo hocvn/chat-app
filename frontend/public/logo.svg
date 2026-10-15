@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366F1" />
+      <stop offset="50%" stop-color="#8B5CF6" />
+      <stop offset="100%" stop-color="#EC4899" />
+    </linearGradient>
+
+    <!-- Front Bubble Gradient -->
+    <linearGradient id="front-bubble-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#F8FAFC" />
+    </linearGradient>
+
+    <!-- Back Bubble Gradient -->
+    <linearGradient id="back-bubble-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E0E7FF" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#C7D2FE" stop-opacity="0.75" />
+    </linearGradient>
+
+    <!-- Dots Gradient -->
+    <linearGradient id="dots-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366F1" />
+      <stop offset="100%" stop-color="#EC4899" />
+    </linearGradient>
+
+    <!-- Drop Shadow -->
+    <filter id="shadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#1E1B4B" flood-opacity="0.32" />
+    </filter>
+
+    <filter id="soft-glow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.15" />
+    </filter>
+  </defs>
+
+  <!-- Background Squircle Container -->
+  <rect width="512" height="512" rx="128" fill="url(#bg-grad)" />
+
+  <!-- Subtle Inner Border Highlight -->
+  <rect x="6" y="6" width="500" height="500" rx="122" stroke="white" stroke-opacity="0.25" stroke-width="4" fill="none" />
+
+  <!-- Back Secondary Bubble -->
+  <g filter="url(#soft-glow)">
+    <path
+      d="M260 110 h 110 a 45 45 0 0 1 45 45 v 65 a 45 45 0 0 1 -45 45 h -20 l -32 28 v -28 h -58 a 45 45 0 0 1 -45 -45 v -65 a 45 45 0 0 1 45 -45 z"
+      fill="url(#back-bubble-grad)"
+    />
+  </g>
+
+  <!-- Front Primary Bubble -->
+  <g filter="url(#shadow)">
+    <path
+      d="M136 175 h 190 a 52 52 0 0 1 52 52 v 85 a 52 52 0 0 1 -52 52 h -95 l -65 48 v -48 h -30 a 52 52 0 0 1 -52 -52 v -85 a 52 52 0 0 1 52 -52 z"
+      fill="url(#front-bubble-grad)"
+    />
+
+    <!-- Real-time Communication Pulse Dots inside Front Bubble -->
+    <circle cx="186" cy="268" r="15" fill="url(#dots-grad)" />
+    <circle cx="231" cy="268" r="15" fill="url(#dots-grad)" />
+    <circle cx="276" cy="268" r="15" fill="url(#dots-grad)" />
+  </g>
+
+  <!-- Tiny Sparkle Indicator at Top Right -->
+  <path
+    d="M400 95 Q400 120 425 120 Q400 120 400 145 Q400 120 375 120 Q400 120 400 95 Z"
+    fill="#FDF2F8"
+    opacity="0.9"
+  />
+</svg>

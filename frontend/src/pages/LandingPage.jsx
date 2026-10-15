@@ -254,7 +254,6 @@ const LandingPage = () => {
                   to="/signup"
                   className="btn btn-primary btn-lg gap-2 shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all w-full sm:w-auto"
                 >
-                  <Sparkles className="w-5 h-5" />
                   <span>Start Chatting Free</span>
                   <ArrowRight className="w-5 h-5" />
                 </Link>
@@ -361,11 +360,10 @@ const LandingPage = () => {
                   />
                   <div className={`max-w-[80%] sm:max-w-md ${msg.isMe ? "items-end" : "items-start"}`}>
                     <div
-                      className={`rounded-2xl px-4 py-2.5 text-sm shadow-sm ${
-                        msg.isMe
+                      className={`rounded-2xl px-4 py-2.5 text-sm shadow-sm ${msg.isMe
                           ? "bg-primary text-primary-content rounded-br-none"
                           : "bg-base-100 border border-base-300 text-base-content rounded-bl-none"
-                      }`}
+                        }`}
                     >
                       {msg.text && <p>{msg.text}</p>}
                       {msg.image && (
@@ -379,9 +377,8 @@ const LandingPage = () => {
                       )}
                     </div>
                     <div
-                      className={`flex items-center gap-1 mt-1 text-[10px] text-base-content/50 ${
-                        msg.isMe ? "justify-end" : "justify-start"
-                      }`}
+                      className={`flex items-center gap-1 mt-1 text-[10px] text-base-content/50 ${msg.isMe ? "justify-end" : "justify-start"
+                        }`}
                     >
                       <span>{msg.time}</span>
                       {msg.isMe && <CheckCircle2 className="w-3 h-3 text-primary" />}
@@ -523,11 +520,10 @@ const LandingPage = () => {
               <button
                 key={t}
                 onClick={() => setTheme(t)}
-                className={`group p-3 rounded-xl border text-left transition-all ${
-                  theme === t
+                className={`group p-3 rounded-xl border text-left transition-all ${theme === t
                     ? "border-primary bg-base-100 shadow-md ring-2 ring-primary/20 scale-[1.02]"
                     : "border-base-300 bg-base-100 hover:border-primary/50 hover:bg-base-100/80"
-                }`}
+                  }`}
               >
                 {/* Theme Palette Bar */}
                 <div
@@ -725,9 +721,7 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div className="space-y-3 md:col-span-1">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-content">
-                <MessageSquare className="w-4 h-4" />
-              </div>
+              <img src="/logo.svg" alt="Chattap Logo" className="w-8 h-8 rounded-lg shadow-sm" />
               <span className="font-bold text-lg">Chattap</span>
             </div>
             <p className="text-xs text-base-content/60 leading-relaxed">
