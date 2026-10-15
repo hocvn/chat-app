@@ -2,33 +2,15 @@ import { Server } from 'socket.io';
 import http from 'http';
 import express from 'express';
 import dotenv from 'dotenv';
+import { corsOptions } from './cors.js';
 
 dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
 
-const allowedOrigins = [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    process.env.CLIENT_URL,
-].filter(Boolean);
-
 const io = new Server(server, {
-    cors: {
-        origin: (origin, callback) => {
-            if (!origin) return callback(null, true);
-            if (
-                process.env.NODE_ENV !== 'production' ||
-                allowedOrigins.includes(origin) ||
-                allowedOrigins.includes('*')
-            ) {
-                return callback(null, true);
-            }
-            return callback(new Error('Not allowed by CORS'));
-        },
-        credentials: true,
-    }
+    cors: corsOptions,
 });
 
 export function getReceiverSocketId(userId) {
