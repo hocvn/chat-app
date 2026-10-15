@@ -17,9 +17,12 @@ The Chat App provides authenticated users with instant 1-to-1 messaging, media s
 - **Log In**: Existing users authenticate with their `username` and `password`.
 - **Log Out**: Terminates the session by clearing the authentication token cookie.
 - **Session Persistence**: Authentication token is stored in an `httpOnly` secure cookie. The client restores authenticated state on load via `/api/auth/check-auth`.
-- **Route Protection**: Unauthenticated requests to protected endpoints or views redirect to the login page. Authenticated users attempting to visit login/signup are redirected to the chat home screen.
+- **Route Protection**: Unauthenticated requests to protected endpoints or views redirect to the login page. Authenticated users attempting to visit login/signup are redirected to the chat home screen. Unauthenticated visitors accessing the root path (`/`) are presented with the interactive Landing Page.
 
-### 2.2 Live Presence & Contact List
+### 2.2 Interactive Landing Page
+- **Product Overview & Demo**: Features a responsive hero banner, interactive simulated chat preview, and bento feature cards.
+- **Live Theme Customizer**: Visitors can test and apply DaisyUI themes live from the landing page.
+- **Conversion CTAs**: Quick navigation links and buttons driving visitors to registration (`/signup`) or sign in (`/login`).
 - **Contact Directory**: Shows all registered users except the currently logged-in user.
 - **Online Indicators**: Displays live presence status (online/offline) for each user via green indicators and badges.
 - **Online Filter**: Allows filtering contacts to show only currently connected users.
