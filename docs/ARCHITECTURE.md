@@ -147,7 +147,7 @@ Global state is divided into three focused stores:
 ### 4.2 Network & API Client
 
 - **Axios Instance** (`frontend/src/lib/axios.js`):
-  - In development: resolves `baseURL` to `http://localhost:3000/api`.
+  - In development: resolves `baseURL` to `http://localhost:5001/api` (or `VITE_API_URL`).
   - In production: resolves `baseURL` to relative `/api` (served by the same Express host).
   - Configured with `withCredentials: true` to ensure JWT cookies are sent on every request.
 
@@ -248,7 +248,7 @@ sequenceDiagram
 The application uses a centralized CORS configuration (`backend/src/lib/cors.js`) shared between the Express HTTP app and Socket.IO:
 
 1. **Origin Resolution**:
-   - **Local Development**: `http://localhost:5173`, `http://localhost:3000`, `http://127.0.0.1:5173`, `http://127.0.0.1:3000`.
+   - **Local Development**: `http://localhost:5173`, `http://localhost:5001`, `http://localhost:3000`, `http://127.0.0.1:5173`, `http://127.0.0.1:5001`, `http://127.0.0.1:3000`.
    - **Environment Variable (`CLIENT_URL`)**: Supports comma-separated origin strings with whitespace and trailing slash normalization.
    - **Render Deployments**: Automatically permits origins ending with `.onrender.com` (matching any Render web service subdomain) as well as `RENDER_EXTERNAL_URL` and `RENDER_EXTERNAL_HOSTNAME`.
    - **Non-Browser & Same-Origin**: Requests without an `Origin` header (health checks, server-to-server pings, curl) are permitted.
@@ -296,7 +296,7 @@ In production (`NODE_ENV === 'production'`), Express serves the compiled React a
 
 | Variable | Target | Description | Example |
 |---|---|---|---|
-| `PORT` | Backend | HTTP port Express listens on (automatically provided by Render). | `3000` or `10000` |
+| `PORT` | Backend | HTTP port Express listens on (automatically provided by Render). | `5001`, `3000`, or `10000` |
 | `NODE_ENV` | Backend | Execution environment (`development` or `production`). | `production` |
 | `MONGODB_URI` | Backend | MongoDB connection string (Replica set or Atlas cluster). | `mongodb+srv://...` |
 | `JWT_SECRET` | Backend | Cryptographic secret for signing auth tokens. | `64-character-string` |
