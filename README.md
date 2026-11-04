@@ -148,7 +148,7 @@ Create a `.env` file in the `backend/` directory (see [Environment Variables](#e
 Start the backend development server:
 ```bash
 npm run dev
-# Server runs on http://localhost:3000
+# Server runs on http://localhost:5001
 ```
 
 **3. Setup Frontend**
@@ -173,7 +173,7 @@ Configure your `backend/.env` file with the following variables:
 
 ```ini
 # Server Port
-PORT=3000
+PORT=5001
 
 # Database Connection
 MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/chat_db?retryWrites=true&w=majority

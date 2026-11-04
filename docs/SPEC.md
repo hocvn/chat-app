@@ -33,7 +33,7 @@ The Chat App provides authenticated users with instant 1-to-1 messaging, media s
 - **Real-Time Message Delivery**: Messages sent while the recipient is online arrive immediately without polling or page refresh.
 - **Offline Persistence**: Messages are saved in MongoDB and retrieved whenever a conversation is opened, ensuring offline users receive all messages upon logging back in.
 - **Image Attachments**: Users can attach image files to messages. Images are uploaded to Cloudinary CDN storage and rendered inline in the chat bubble.
-- **Message Input Controls**: Includes text input, image file picker, image thumbnail preview with removal action before sending, and keyboard submit (Enter).
+- **Message Input Controls**: Includes text input, image file picker, image thumbnail preview, a built-in emote/sticker picker, and keyboard submit. Selected emotes send with the existing Send button; stickers send immediately.
 
 ### 2.4 Profile Management
 - **User Details**: Profile page displays user avatar, full name, username, email, member since date, and account status (Active).
@@ -67,9 +67,10 @@ The Chat App provides authenticated users with instant 1-to-1 messaging, media s
 ### 3.3 Sending & Receiving Messages
 1. User selects a contact from the sidebar.
 2. Client queries `GET /api/messages/:id` and populates the message pane.
-3. User types a message and optionally attaches an image.
-4. Sending triggers `POST /api/messages/send/:id`.
-5. Server saves message to database, uploads image to Cloudinary if attached, and emits `newMessage` via Socket.IO to the recipient if online.
+3. User types a message and may attach an image, queue a built-in Unicode emote, or select a built-in sticker.
+4. The existing Send button submits text, image, and any queued emote together; selecting a sticker sends it immediately.
+5. Sending triggers `POST /api/messages/send/:id` with optional typed `content`.
+6. Server validates and saves message content, uploads an image to Cloudinary if attached, and emits `newMessage` via Socket.IO to the recipient if online.
 6. The sender's client appends the new message immediately.
 7. The recipient's client receives `newMessage` event; if the sender is currently selected, message is appended to the view.
 
@@ -97,7 +98,7 @@ The Chat App provides authenticated users with instant 1-to-1 messaging, media s
 | `PUT` | `/api/auth/update-profile`| Yes (JWT) | Upload and update user avatar |
 | `GET` | `/api/messages/users` | Yes (JWT) | Fetch all users for the sidebar (excluding current user) |
 | `GET` | `/api/messages/:id` | Yes (JWT) | Retrieve message history between logged-in user and `:id` |
-| `POST` | `/api/messages/send/:id` | Yes (JWT) | Send a text/image message to recipient `:id` |
+| `POST` | `/api/messages/send/:id` | Yes (JWT) | Send text, image, and/or typed emote/sticker content to recipient `:id` |
 
 ### 4.2 Real-Time WebSocket Events (Socket.IO)
 
@@ -110,7 +111,7 @@ The Chat App provides authenticated users with instant 1-to-1 messaging, media s
   - Payload: Array of currently online user IDs `string[]`.
 - **`newMessage`** (Server -> Specific Recipient Socket):
   - Emitted when a new message is saved and recipient is currently connected.
-  - Payload: `Message` document object (`_id`, `senderId`, `receiverId`, `text`, `image`, `createdAt`).
+  - Payload: `Message` document object (`_id`, `senderId`, `receiverId`, `text`, `image`, `content`, `createdAt`).
 - **Disconnection**:
   - Server removes user mapping from `userSocketMap` and re-broadcasts `getOnlineUsers`.
 
@@ -138,6 +139,7 @@ The Chat App provides authenticated users with instant 1-to-1 messaging, media s
 | `receiverId` | ObjectId (ref: User) | Recipient's user ID |
 | `text` | String | Message text content (optional if image present) |
 | `image` | String | Cloudinary URL for attached image (optional) |
+| `content` | Object | Optional `{ type: "emote" | "sticker", value: string }`; stickers reference app-owned catalog IDs |
 | `createdAt` | Date | Creation timestamp |
 | `updatedAt` | Date | Last modification timestamp |
 

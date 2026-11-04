@@ -2,6 +2,7 @@ import User from '../models/user.model.js';
 import Message from '../models/message.model.js';
 import cloudinary from '../lib/cloudinary.js';
 import { getReceiverSocketId, io } from '../lib/socket.js';
+import { hasInvalidSuppliedContent, hasMessageBody } from '../lib/message-content.js';
 
 export const getUsersForSidebar = async (req, res) => {
     try {
@@ -37,7 +38,11 @@ export const sendMessage = async (req, res) => {
     try {
         const senderId = req.user._id;
         const { id: receiverId } = req.params;
-        const { text, image } = req.body;
+        const { text, image, content } = req.body;
+
+        if (hasInvalidSuppliedContent(req.body) || !hasMessageBody({ text, image, content })) {
+            return res.status(400).json({ message: "A message must include text, an image, or valid content" });
+        }
 
         let imageUrl;
         if (image) {
@@ -50,7 +55,8 @@ export const sendMessage = async (req, res) => {
             senderId: senderId,
             receiverId: receiverId,
             text: text,
-            image: imageUrl
+            image: imageUrl,
+            content: content || undefined
         });
 
         await newMessage.save();

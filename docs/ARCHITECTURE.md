@@ -139,7 +139,8 @@ Global state is divided into three focused stores:
    - Socket synchronization: Connects with query param `userId: authUser._id`, listens for `getOnlineUsers`, and updates `onlineUsers` state. Cleans up socket connection on logout.
 2. **`useChatStore`**:
    - Manages contact list (`users`), active conversation (`selectedUser`), message history (`messages`), and loading states.
-   - Real-time updates: `subcribeToMessages()` attaches a listener to the `newMessage` socket event. When a message from `selectedUser` arrives, it appends it to `messages`.
+    - Real-time updates: `subcribeToMessages()` attaches a listener to the `newMessage` socket event. When a message from `selectedUser` arrives, it appends it to `messages`.
+    - Message content: forwards optional `{ type: "emote" | "sticker", value: string }` payloads unchanged; the frontend catalog resolves sticker IDs to bundled static assets.
 3. **`useThemeStore`**:
    - Manages UI theme selection across 32 DaisyUI themes.
    - Persists user choice in `localStorage` (`chat-theme`) and synchronizes the HTML root attribute `document.documentElement.setAttribute('data-theme', theme)`.
@@ -147,7 +148,7 @@ Global state is divided into three focused stores:
 ### 4.2 Network & API Client
 
 - **Axios Instance** (`frontend/src/lib/axios.js`):
-  - In development: resolves `baseURL` to `http://localhost:3000/api`.
+  - In development: resolves `baseURL` to `http://localhost:5001/api` (or `VITE_API_URL`).
   - In production: resolves `baseURL` to relative `/api` (served by the same Express host).
   - Configured with `withCredentials: true` to ensure JWT cookies are sent on every request.
 
@@ -201,7 +202,7 @@ sequenceDiagram
 2. **`message.controller.js`**:
    - `getUsersForSidebar`: Queries all users except `req.user._id`, omitting passwords (`-password`).
    - `getMessages`: Retrieves all messages between `senderId` and `userToChatId` ordered chronologically.
-   - `sendMessage`: Optionally uploads image to Cloudinary, persists `Message` document in MongoDB, checks recipient presence via `getReceiverSocketId(receiverId)`, and emits `newMessage` event if the recipient is online.
+    - `sendMessage`: Optionally uploads image to Cloudinary, validates and persists typed emote/sticker content, checks recipient presence via `getReceiverSocketId(receiverId)`, and emits `newMessage` event if the recipient is online. Sticker artwork is frontend static assets resolved from catalog IDs.
 3. **`health.controller.js`**:
    - `checkHealth`: Returns HTTP 200 with service status, uptime, and timestamp for uptime checks and orchestrators.
 
@@ -248,7 +249,7 @@ sequenceDiagram
 The application uses a centralized CORS configuration (`backend/src/lib/cors.js`) shared between the Express HTTP app and Socket.IO:
 
 1. **Origin Resolution**:
-   - **Local Development**: `http://localhost:5173`, `http://localhost:3000`, `http://127.0.0.1:5173`, `http://127.0.0.1:3000`.
+   - **Local Development**: `http://localhost:5173`, `http://localhost:5001`, `http://localhost:3000`, `http://127.0.0.1:5173`, `http://127.0.0.1:5001`, `http://127.0.0.1:3000`.
    - **Environment Variable (`CLIENT_URL`)**: Supports comma-separated origin strings with whitespace and trailing slash normalization.
    - **Render Deployments**: Automatically permits origins ending with `.onrender.com` (matching any Render web service subdomain) as well as `RENDER_EXTERNAL_URL` and `RENDER_EXTERNAL_HOSTNAME`.
    - **Non-Browser & Same-Origin**: Requests without an `Origin` header (health checks, server-to-server pings, curl) are permitted.
@@ -296,7 +297,7 @@ In production (`NODE_ENV === 'production'`), Express serves the compiled React a
 
 | Variable | Target | Description | Example |
 |---|---|---|---|
-| `PORT` | Backend | HTTP port Express listens on (automatically provided by Render). | `3000` or `10000` |
+| `PORT` | Backend | HTTP port Express listens on (automatically provided by Render). | `5001`, `3000`, or `10000` |
 | `NODE_ENV` | Backend | Execution environment (`development` or `production`). | `production` |
 | `MONGODB_URI` | Backend | MongoDB connection string (Replica set or Atlas cluster). | `mongodb+srv://...` |
 | `JWT_SECRET` | Backend | Cryptographic secret for signing auth tokens. | `64-character-string` |
