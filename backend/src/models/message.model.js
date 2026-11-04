@@ -17,6 +17,18 @@ const messageSchema = new mongoose.Schema({
     image : {
         type: String
     },
+    content: {
+        type: {
+            type: String,
+            enum: ["emote", "sticker"]
+        },
+        value: {
+            type: String,
+            required: function () {
+                return Boolean(this.content?.type);
+            }
+        }
+    },
 }, {
     timestamps: true
 });
