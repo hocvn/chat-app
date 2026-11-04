@@ -7,6 +7,7 @@ import MessageInput from './MessageInput';
 import { useChatStore } from '../store/useChatStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { formatDateTime } from '../lib/utils';
+import { getStickerById } from '../constants/messageCatalog';
 
 const ChatContainer = () => {
     const { messages, getMessages, isMessageLoading, selectedUser, subcribeToMessages, unsubscribeFromMessages } = useChatStore();
@@ -77,6 +78,10 @@ const ChatContainer = () => {
                                 />
                             )}
                             {message.text && <p>{message.text}</p>}
+                            {message.content?.type === "emote" && <p className="text-3xl" aria-label="Emote">{message.content.value}</p>}
+                            {message.content?.type === "sticker" && getStickerById(message.content.value) && (
+                                <img src={getStickerById(message.content.value).src} alt={getStickerById(message.content.value).label} width="160" height="160" className="w-32" />
+                            )}
                         </div>
                     </div>
                 ))}

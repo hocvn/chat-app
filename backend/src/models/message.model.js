@@ -20,13 +20,14 @@ const messageSchema = new mongoose.Schema({
     content: {
         type: {
             type: String,
-            enum: ["emote", "sticker"]
+            enum: ["emote", "sticker"],
+            required: function () {
+                return this.content !== undefined;
+            }
         },
         value: {
             type: String,
-            required: function () {
-                return Boolean(this.content?.type);
-            }
+            required: true
         }
     },
 }, {

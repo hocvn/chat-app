@@ -139,7 +139,8 @@ Global state is divided into three focused stores:
    - Socket synchronization: Connects with query param `userId: authUser._id`, listens for `getOnlineUsers`, and updates `onlineUsers` state. Cleans up socket connection on logout.
 2. **`useChatStore`**:
    - Manages contact list (`users`), active conversation (`selectedUser`), message history (`messages`), and loading states.
-   - Real-time updates: `subcribeToMessages()` attaches a listener to the `newMessage` socket event. When a message from `selectedUser` arrives, it appends it to `messages`.
+    - Real-time updates: `subcribeToMessages()` attaches a listener to the `newMessage` socket event. When a message from `selectedUser` arrives, it appends it to `messages`.
+    - Message content: forwards optional `{ type: "emote" | "sticker", value: string }` payloads unchanged; the frontend catalog resolves sticker IDs to bundled static assets.
 3. **`useThemeStore`**:
    - Manages UI theme selection across 32 DaisyUI themes.
    - Persists user choice in `localStorage` (`chat-theme`) and synchronizes the HTML root attribute `document.documentElement.setAttribute('data-theme', theme)`.
@@ -201,7 +202,7 @@ sequenceDiagram
 2. **`message.controller.js`**:
    - `getUsersForSidebar`: Queries all users except `req.user._id`, omitting passwords (`-password`).
    - `getMessages`: Retrieves all messages between `senderId` and `userToChatId` ordered chronologically.
-   - `sendMessage`: Optionally uploads image to Cloudinary, persists `Message` document in MongoDB, checks recipient presence via `getReceiverSocketId(receiverId)`, and emits `newMessage` event if the recipient is online.
+    - `sendMessage`: Optionally uploads image to Cloudinary, validates and persists typed emote/sticker content, checks recipient presence via `getReceiverSocketId(receiverId)`, and emits `newMessage` event if the recipient is online. Sticker artwork is frontend static assets resolved from catalog IDs.
 3. **`health.controller.js`**:
    - `checkHealth`: Returns HTTP 200 with service status, uptime, and timestamp for uptime checks and orchestrators.
 
