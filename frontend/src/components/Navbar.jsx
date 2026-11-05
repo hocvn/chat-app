@@ -41,12 +41,6 @@ const Navbar = () => {
                 >
                   Themes
                 </a>
-                <a
-                  href="/#tech-stack"
-                  className="px-3 py-1.5 rounded-lg hover:bg-base-200 hover:text-base-content transition-colors"
-                >
-                  Stack
-                </a>
               </nav>
             )}
           </div>

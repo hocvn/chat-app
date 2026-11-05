@@ -13,3 +13,4 @@
 - [x] Task 4: Revamp `README.md` to reflect full feature set, accurate env vars, API endpoints, and project structure
 - [x] Task 5: Validate frontend build (`npm run build`) and linting (`npm run lint` - 0 errors)
 - [x] Task 6: Dev server verified with HTTP 200 OK; automated browser subagent encountered Playwright binary download restrictions in environment, manual browser verification ready at http://localhost:5173
+- [ ] 2026-11-05: Redesign the landing page using the approved Common Room direction; validate interactions, responsiveness, linting, and production build.
