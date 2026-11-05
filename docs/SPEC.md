@@ -34,6 +34,7 @@ The Chat App provides authenticated users with instant 1-to-1 messaging, media s
 - **Offline Persistence**: Messages are saved in MongoDB and retrieved whenever a conversation is opened, ensuring offline users receive all messages upon logging back in.
 - **Image Attachments**: Users can attach image files to messages. Images are uploaded to Cloudinary CDN storage and rendered inline in the chat bubble.
 - **Message Input Controls**: Includes text input, image file picker, image thumbnail preview, a built-in emote/sticker picker, and keyboard submit. Selected emotes send with the existing Send button; stickers send immediately.
+- **Message Reactions**: Either participant can toggle one of five fixed emoji reactions (`👍`, `❤️`, `😂`, `😮`, `🎉`) on a message. Matching reactions are grouped with a count and synchronize live for both participants.
 
 ### 2.4 Profile Management
 - **User Details**: Profile page displays user avatar, full name, username, email, member since date, and account status (Active).
@@ -99,6 +100,7 @@ The Chat App provides authenticated users with instant 1-to-1 messaging, media s
 | `GET` | `/api/messages/users` | Yes (JWT) | Fetch all users for the sidebar (excluding current user) |
 | `GET` | `/api/messages/:id` | Yes (JWT) | Retrieve message history between logged-in user and `:id` |
 | `POST` | `/api/messages/send/:id` | Yes (JWT) | Send text, image, and/or typed emote/sticker content to recipient `:id` |
+| `POST` | `/api/messages/:id/reactions` | Yes (JWT) | Toggle the current user's allowed emoji reaction on message `:id` |
 
 ### 4.2 Real-Time WebSocket Events (Socket.IO)
 
@@ -112,6 +114,9 @@ The Chat App provides authenticated users with instant 1-to-1 messaging, media s
 - **`newMessage`** (Server -> Specific Recipient Socket):
   - Emitted when a new message is saved and recipient is currently connected.
   - Payload: `Message` document object (`_id`, `senderId`, `receiverId`, `text`, `image`, `content`, `createdAt`).
+- **`messageReactionUpdated`** (Server -> Both Conversation Participants):
+  - Emitted when either participant toggles a valid reaction on a message.
+  - Payload: Updated `Message` document object, including `reactions`.
 - **Disconnection**:
   - Server removes user mapping from `userSocketMap` and re-broadcasts `getOnlineUsers`.
 
@@ -140,6 +145,7 @@ The Chat App provides authenticated users with instant 1-to-1 messaging, media s
 | `text` | String | Message text content (optional if image present) |
 | `image` | String | Cloudinary URL for attached image (optional) |
 | `content` | Object | Optional `{ type: "emote" | "sticker", value: string }`; stickers reference app-owned catalog IDs |
+| `reactions` | Array | Grouped `{ emoji: string, userIds: ObjectId[] }` reactions; only the five built-in reaction emojis are accepted through the API |
 | `createdAt` | Date | Creation timestamp |
 | `updatedAt` | Date | Last modification timestamp |
 

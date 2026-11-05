@@ -140,7 +140,8 @@ Global state is divided into three focused stores:
 2. **`useChatStore`**:
    - Manages contact list (`users`), active conversation (`selectedUser`), message history (`messages`), and loading states.
     - Real-time updates: `subcribeToMessages()` attaches a listener to the `newMessage` socket event. When a message from `selectedUser` arrives, it appends it to `messages`.
-    - Message content: forwards optional `{ type: "emote" | "sticker", value: string }` payloads unchanged; the frontend catalog resolves sticker IDs to bundled static assets.
+     - Message content: forwards optional `{ type: "emote" | "sticker", value: string }` payloads unchanged; the frontend catalog resolves sticker IDs to bundled static assets.
+     - Message reactions: posts reaction toggles to the message API and replaces an updated message in the active thread when a `messageReactionUpdated` socket event belongs to the selected two-person conversation.
 3. **`useThemeStore`**:
    - Manages UI theme selection across 32 DaisyUI themes.
    - Persists user choice in `localStorage` (`chat-theme`) and synchronizes the HTML root attribute `document.documentElement.setAttribute('data-theme', theme)`.
@@ -202,7 +203,8 @@ sequenceDiagram
 2. **`message.controller.js`**:
    - `getUsersForSidebar`: Queries all users except `req.user._id`, omitting passwords (`-password`).
    - `getMessages`: Retrieves all messages between `senderId` and `userToChatId` ordered chronologically.
-    - `sendMessage`: Optionally uploads image to Cloudinary, validates and persists typed emote/sticker content, checks recipient presence via `getReceiverSocketId(receiverId)`, and emits `newMessage` event if the recipient is online. Sticker artwork is frontend static assets resolved from catalog IDs.
+     - `sendMessage`: Optionally uploads image to Cloudinary, validates and persists typed emote/sticker content, checks recipient presence via `getReceiverSocketId(receiverId)`, and emits `newMessage` event if the recipient is online. Sticker artwork is frontend static assets resolved from catalog IDs.
+     - `toggleMessageReaction`: Validates an allowed emoji, confirms the authenticated user is either the message sender or receiver, toggles their ID within the message's grouped reactions, then emits `messageReactionUpdated` to both conversation participants that are online.
 3. **`health.controller.js`**:
    - `checkHealth`: Returns HTTP 200 with service status, uptime, and timestamp for uptime checks and orchestrators.
 
@@ -227,6 +229,12 @@ sequenceDiagram
     Server->>Server: Lookup userSocketMap[User2] -> Socket2
     Server->>ClientB: Emit 'newMessage' to Socket2
     Server-->>ClientA: 201 Response { message }
+
+    ClientA->>Server: POST /api/messages/Message/reactions { emoji }
+    Server->>DB: Update Message.reactions
+    Server->>ClientA: Emit 'messageReactionUpdated' { message }
+    Server->>ClientB: Emit 'messageReactionUpdated' { message }
+    Server-->>ClientA: 200 Response { message }
 
     ClientA->>Server: Disconnect
     Server->>Server: Delete userSocketMap[User1]
