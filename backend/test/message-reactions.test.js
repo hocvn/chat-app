@@ -29,6 +29,17 @@ test("requires an emoji for persisted reaction groups", () => {
     assert.ok(message.validateSync()?.errors["reactions.0.emoji"]);
 });
 
+test("allows existing text-only messages to receive reactions", () => {
+    const message = new Message({
+        senderId: ID_A,
+        receiverId: ID_B,
+        text: "A message sent before reactions existed",
+        reactions: [{ emoji: "👍", userIds: [ID_A] }],
+    });
+
+    assert.equal(message.validateSync(), undefined);
+});
+
 const createResponse = () => {
     const response = {};
     response.status = (statusCode) => {
@@ -99,4 +110,41 @@ test("rejects unsupported reaction emojis without looking up or mutating a messa
     await toggleMessageReaction({ params: { id: "message-1" }, body: { emoji: "🫠" }, user: { _id: ID_A } }, response);
 
     assert.equal(response.statusCode, 400);
+});
+
+test("retries a conflicting reaction save against a fresh message", async () => {
+    const staleMessage = {
+        senderId: ID_A,
+        receiverId: ID_B,
+        reactions: [],
+        async save() {
+            const error = new Error("No matching document found");
+            error.name = "VersionError";
+            throw error;
+        },
+    };
+    const freshMessage = {
+        _id: "message-1",
+        senderId: ID_A,
+        receiverId: ID_B,
+        reactions: [{ emoji: "❤️", userIds: [ID_B] }],
+        async save() {
+            return this;
+        },
+    };
+    const messages = [staleMessage, freshMessage];
+    const toggleMessageReaction = createToggleMessageReaction({
+        findMessageById: async () => messages.shift(),
+        getReceiverSocketId: () => undefined,
+        io: { to: () => assert.fail("must not emit without a socket") },
+    });
+    const response = createResponse();
+
+    await toggleMessageReaction({ params: { id: "message-1" }, body: { emoji: "👍" }, user: { _id: ID_A } }, response);
+
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(freshMessage.reactions, [
+        { emoji: "❤️", userIds: [ID_B] },
+        { emoji: "👍", userIds: [ID_A] },
+    ]);
 });

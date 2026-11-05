@@ -12,6 +12,18 @@ const reactionSchema = new mongoose.Schema({
     }],
 }, { _id: false });
 
+const contentSchema = new mongoose.Schema({
+    type: {
+        type: String,
+        enum: ["emote", "sticker"],
+        required: true,
+    },
+    value: {
+        type: String,
+        required: true,
+    },
+}, { _id: false });
+
 const messageSchema = new mongoose.Schema({
     senderId : {
         type: mongoose.Schema.Types.ObjectId,
@@ -30,17 +42,8 @@ const messageSchema = new mongoose.Schema({
         type: String
     },
     content: {
-        type: {
-            type: String,
-            enum: ["emote", "sticker"],
-            required: function () {
-                return this.content !== undefined;
-            }
-        },
-        value: {
-            type: String,
-            required: true
-        }
+        type: contentSchema,
+        default: undefined,
     },
     reactions: {
         type: [reactionSchema],

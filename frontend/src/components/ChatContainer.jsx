@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
 
 import ChatHeader from './ChatHeader';
 import MessageSkeleton from './skeletons/MessageSkeleton';
@@ -18,6 +19,8 @@ const ChatContainer = () => {
     const handleReaction = async (messageId, emoji) => {
         try {
             await toggleReaction(messageId, emoji);
+        } catch {
+            toast.error("Failed to update reaction");
         } finally {
             setReactionPickerMessageId(null);
         }
@@ -99,6 +102,7 @@ const ChatContainer = () => {
                                     type="button"
                                     className={`btn btn-xs gap-1 rounded-full ${hasReacted(reaction, authUser._id) ? "btn-primary" : "btn-ghost border border-base-300"}`}
                                     aria-label={`${reaction.emoji} reaction, ${reaction.userIds.length} ${reaction.userIds.length === 1 ? "person" : "people"}`}
+                                    aria-pressed={hasReacted(reaction, authUser._id)}
                                     onClick={() => handleReaction(message._id, reaction.emoji)}
                                 >
                                     <span>{reaction.emoji}</span>

@@ -106,8 +106,8 @@ The Chat App provides authenticated users with instant 1-to-1 messaging, media s
 
 - **Connection**:
   - Endpoint: `ws://<host>:<port>` (fallback to HTTP long-polling).
-  - Handshake Query: `?userId=<mongo_user_id>`.
-  - Server registers `socket.id` against `userId` in `userSocketMap`.
+  - Handshake authentication: the HTTP-only JWT `token` cookie is verified by Socket.IO before connection.
+  - Server derives the authenticated user ID from the token and registers all of that user's active socket IDs.
 - **`getOnlineUsers`** (Server -> All Clients):
   - Emitted upon connection and disconnection.
   - Payload: Array of currently online user IDs `string[]`.

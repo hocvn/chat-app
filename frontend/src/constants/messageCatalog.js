@@ -34,6 +34,15 @@ export const replaceMessage = (messages, updatedMessage) => messages.map((messag
     message._id === updatedMessage._id ? updatedMessage : message
 ));
 
+export const replaceMessageIfNewer = (messages, updatedMessage) => {
+    const currentMessage = messages.find((message) => message._id === updatedMessage._id);
+    if (!currentMessage?.updatedAt || !updatedMessage.updatedAt || new Date(updatedMessage.updatedAt) >= new Date(currentMessage.updatedAt)) {
+        return replaceMessage(messages, updatedMessage);
+    }
+
+    return messages;
+};
+
 export const isMessageInConversation = (message, authUserId, selectedUserId) => (
     (message.senderId === authUserId && message.receiverId === selectedUserId)
     || (message.senderId === selectedUserId && message.receiverId === authUserId)

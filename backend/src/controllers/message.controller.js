@@ -1,7 +1,7 @@
 import User from '../models/user.model.js';
 import Message from '../models/message.model.js';
 import cloudinary from '../lib/cloudinary.js';
-import { getReceiverSocketId, io } from '../lib/socket.js';
+import { getReceiverSocketId, getReceiverSocketIds, io } from '../lib/socket.js';
 import { hasInvalidSuppliedContent, hasMessageBody } from '../lib/message-content.js';
 import { isValidReactionEmoji, toggleReaction } from '../lib/message-reactions.js';
 
@@ -76,31 +76,43 @@ export const sendMessage = async (req, res) => {
     }
 }
 
-export const createToggleMessageReaction = ({ findMessageById, getReceiverSocketId, io }) => async (req, res) => {
+export const createToggleMessageReaction = ({ findMessageById, getReceiverSocketId, getReceiverSocketIds, io }) => async (req, res) => {
     try {
         const { emoji } = req.body;
         if (!isValidReactionEmoji(emoji)) {
             return res.status(400).json({ message: "Unsupported reaction emoji" });
         }
 
-        const message = await findMessageById(req.params.id);
-        if (!message) {
-            return res.status(404).json({ message: "Message not found" });
-        }
-
         const userId = req.user._id.toString();
-        const senderId = message.senderId.toString();
-        const receiverId = message.receiverId.toString();
-        if (userId !== senderId && userId !== receiverId) {
-            return res.status(403).json({ message: "You cannot react to this message" });
+        let message;
+        let senderId;
+        let receiverId;
+
+        for (let attempt = 0; attempt < 3; attempt += 1) {
+            message = await findMessageById(req.params.id);
+            if (!message) {
+                return res.status(404).json({ message: "Message not found" });
+            }
+
+            senderId = message.senderId.toString();
+            receiverId = message.receiverId.toString();
+            if (userId !== senderId && userId !== receiverId) {
+                return res.status(403).json({ message: "You cannot react to this message" });
+            }
+
+            message.reactions = toggleReaction(message.reactions || [], emoji, userId);
+            try {
+                await message.save();
+                break;
+            } catch (error) {
+                if (error.name !== "VersionError" || attempt === 2) throw error;
+            }
         }
 
-        message.reactions = toggleReaction(message.reactions || [], emoji, userId);
-        await message.save();
-
+        const socketIdsForUser = getReceiverSocketIds || ((participantId) => [getReceiverSocketId(participantId)]);
         const participantSocketIds = new Set([
-            getReceiverSocketId(senderId),
-            getReceiverSocketId(receiverId),
+            ...socketIdsForUser(senderId),
+            ...socketIdsForUser(receiverId),
         ].filter(Boolean));
 
         participantSocketIds.forEach((socketId) => {
@@ -117,5 +129,6 @@ export const createToggleMessageReaction = ({ findMessageById, getReceiverSocket
 export const toggleMessageReaction = createToggleMessageReaction({
     findMessageById: Message.findById.bind(Message),
     getReceiverSocketId,
+    getReceiverSocketIds,
     io,
 });

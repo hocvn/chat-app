@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { EMOTES, MESSAGE_PICKER_CLASS_NAME, REACTION_EMOTES, STICKERS, appendEmoteToText, getStickerById, hasReacted, isMessageInConversation, replaceMessage } from "../src/constants/messageCatalog.js";
+import { EMOTES, MESSAGE_PICKER_CLASS_NAME, REACTION_EMOTES, STICKERS, appendEmoteToText, getStickerById, hasReacted, isMessageInConversation, replaceMessage, replaceMessageIfNewer } from "../src/constants/messageCatalog.js";
 
 test("provides a built-in emote and stable unique sticker IDs", () => {
     assert.equal(EMOTES.some(({ value }) => value === "😀"), true);
@@ -46,4 +46,11 @@ test("replaces only the matching message after a reaction update", () => {
 test("limits reaction updates to the active two-person conversation", () => {
     assert.equal(isMessageInConversation({ senderId: "user-a", receiverId: "user-b" }, "user-a", "user-b"), true);
     assert.equal(isMessageInConversation({ senderId: "user-a", receiverId: "user-c" }, "user-a", "user-b"), false);
+});
+
+test("does not replace a newer reaction update with an older snapshot", () => {
+    const currentMessage = { _id: "message-1", reactions: [{ emoji: "👍", userIds: ["user-a", "user-b"] }], updatedAt: "2026-11-05T10:01:00.000Z" };
+    const staleMessage = { _id: "message-1", reactions: [{ emoji: "👍", userIds: ["user-a"] }], updatedAt: "2026-11-05T10:00:00.000Z" };
+
+    assert.deepEqual(replaceMessageIfNewer([currentMessage], staleMessage), [currentMessage]);
 });

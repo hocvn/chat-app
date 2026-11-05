@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import toast from 'react-hot-toast'; 
 import { axiosInstance } from '../lib/axios';
 import { useAuthStore } from './useAuthStore';
-import { isMessageInConversation, replaceMessage } from '../constants/messageCatalog';
+import { isMessageInConversation, replaceMessageIfNewer } from '../constants/messageCatalog';
 
 export const useChatStore = create((set, get) => ({
     messages: [],
@@ -39,10 +39,10 @@ export const useChatStore = create((set, get) => ({
     },
 
     sendMessage: async(messageData) => {
-        const { selectedUser, messages } = get();
+        const { selectedUser } = get();
         try {
             const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, messageData);
-            set({ messages: [...messages, res.data] });
+            set((state) => ({ messages: [...state.messages, res.data] }));
         } catch (error) {
             console.log(error);
             throw error;
@@ -52,7 +52,7 @@ export const useChatStore = create((set, get) => ({
     toggleReaction: async(messageId, emoji) => {
         try {
             const res = await axiosInstance.post(`/messages/${messageId}/reactions`, { emoji });
-            set({ messages: replaceMessage(get().messages, res.data) });
+            set((state) => ({ messages: replaceMessageIfNewer(state.messages, res.data) }));
         } catch (error) {
             console.log(error);
             throw error;
@@ -72,11 +72,11 @@ export const useChatStore = create((set, get) => ({
         })
 
         socket.on('messageReactionUpdated', (updatedMessage) => {
-            const { selectedUser, messages } = get();
+            const { selectedUser } = get();
             const { authUser } = useAuthStore.getState();
             if (!selectedUser || !authUser || !isMessageInConversation(updatedMessage, authUser._id, selectedUser._id)) return;
 
-            set({ messages: replaceMessage(messages, updatedMessage) });
+            set((state) => ({ messages: replaceMessageIfNewer(state.messages, updatedMessage) }));
         });
     },
 

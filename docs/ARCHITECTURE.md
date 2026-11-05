@@ -135,7 +135,7 @@ Global state is divided into three focused stores:
 
 1. **`useAuthStore`**:
    - Manages authenticated user state (`authUser`), authentication flags (`isSigningUp`, `isLoggingIn`, `isCheckingAuth`), and the active Socket.IO connection.
-   - Lifecycle: Initiates `checkAuth()` on application load (`/api/auth/check-auth`). On success, it calls `connectSocket()`.
+   - Lifecycle: Initiates `checkAuth()` on application load (`/api/auth/check-auth`). On success, it calls `connectSocket()`; the socket handshake uses the existing HTTP-only JWT cookie.
    - Socket synchronization: Connects with query param `userId: authUser._id`, listens for `getOnlineUsers`, and updates `onlineUsers` state. Cleans up socket connection on logout.
 2. **`useChatStore`**:
    - Manages contact list (`users`), active conversation (`selectedUser`), message history (`messages`), and loading states.
@@ -215,12 +215,12 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant ClientA as Client A (User 1)
-    participant Server as Socket.IO Server (userSocketMap)
+     participant Server as Socket.IO Server (authenticated socket registry)
     participant ClientB as Client B (User 2)
     participant DB as MongoDB
 
-    ClientA->>Server: Connect (Query: userId=User1)
-    Server->>Server: Record userSocketMap[User1] = Socket1
+    ClientA->>Server: Connect (JWT cookie)
+    Server->>Server: Verify JWT and record Socket1 under User1
     Server->>ClientA: Broadcast getOnlineUsers [User1, User2]
     Server->>ClientB: Broadcast getOnlineUsers [User1, User2]
 
@@ -244,9 +244,9 @@ sequenceDiagram
 ### 6.1 State Management
 
 - Socket connections run on the same HTTP server instance (`server = http.createServer(app)`).
-- Online status is maintained in an in-memory hash map `userSocketMap: { [userId: string]: string }`.
-- On connection: socket handshake reads `socket.handshake.query.userId`, records the active `socket.id`, and emits `getOnlineUsers` to all connected clients.
-- On disconnection: `userId` is removed from `userSocketMap` and an updated list of online IDs is broadcast.
+- Online status is maintained in an in-memory registry of socket IDs per authenticated user.
+- On connection: Socket.IO verifies the JWT cookie, records the authenticated user's `socket.id`, and emits `getOnlineUsers` to all connected clients.
+- On disconnection: only the disconnecting socket ID is removed; an updated list of online IDs is broadcast when appropriate.
 
 ---
 
