@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { useThemeStore } from "../store/useThemeStore";
 import { THEMES } from "../constants";
+import { INITIAL_DEMO_MESSAGES, createDemoReply } from "./landingPageContent";
 import {
   MessageSquare,
   Sparkles,
@@ -119,42 +120,6 @@ const FAQS = [
   },
 ];
 
-const INITIAL_DEMO_MESSAGES = [
-  {
-    id: 1,
-    sender: "Sarah Lin",
-    isMe: false,
-    text: "Hey! Welcome to Chattap 👋 Have you tried the real-time sync yet?",
-    time: "10:24 AM",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
-  },
-  {
-    id: 2,
-    sender: "You",
-    isMe: true,
-    text: "Yes! Socket.IO message delivery is instantaneous 🚀 Zero lag at all.",
-    time: "10:25 AM",
-    avatar: "/avatar.png",
-  },
-  {
-    id: 3,
-    sender: "Sarah Lin",
-    isMe: false,
-    text: "And check out how clean the media attachments look through Cloudinary:",
-    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop&q=80",
-    time: "10:26 AM",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
-  },
-  {
-    id: 4,
-    sender: "You",
-    isMe: true,
-    text: "Love it! Plus there are 32 DaisyUI themes to choose from 🎨",
-    time: "10:27 AM",
-    avatar: "/avatar.png",
-  },
-];
-
 const LandingPage = () => {
   const { authUser } = useAuthStore();
   const { theme, setTheme } = useThemeStore();
@@ -185,14 +150,7 @@ const LandingPage = () => {
       setIsTyping(false);
       setDemoMessages((prev) => [
         ...prev,
-        {
-          id: Date.now() + 1,
-          sender: "Sarah Lin",
-          isMe: false,
-          text: "Awesome message! Sign up now to experience live 1-to-1 chats with friends 🎉",
-          time: "Just now",
-          avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
-        },
+        createDemoReply(Date.now() + 1),
       ]);
     }, 1200);
   };
