@@ -1,5 +1,17 @@
 import mongoose, { mongo } from "mongoose";
 
+const reactionSchema = new mongoose.Schema({
+    emoji: {
+        type: String,
+        required: true,
+    },
+    userIds: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    }],
+}, { _id: false });
+
 const messageSchema = new mongoose.Schema({
     senderId : {
         type: mongoose.Schema.Types.ObjectId,
@@ -29,6 +41,10 @@ const messageSchema = new mongoose.Schema({
             type: String,
             required: true
         }
+    },
+    reactions: {
+        type: [reactionSchema],
+        default: [],
     },
 }, {
     timestamps: true
