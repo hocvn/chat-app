@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
+import { Smile } from 'lucide-react';
 
 import ChatHeader from './ChatHeader';
 import MessageSkeleton from './skeletons/MessageSkeleton';
@@ -8,7 +9,7 @@ import MessageInput from './MessageInput';
 import { useChatStore } from '../store/useChatStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { formatDateTime } from '../lib/utils';
-import { getStickerById, hasReacted, REACTION_EMOTES } from '../constants/messageCatalog';
+import { getReactionButtonPosition, getStickerById, hasReacted, REACTION_EMOTES } from '../constants/messageCatalog';
 
 const ChatContainer = () => {
     const { messages, getMessages, isMessageLoading, selectedUser, subcribeToMessages, toggleReaction, unsubscribeFromMessages } = useChatStore();
@@ -80,7 +81,7 @@ const ChatContainer = () => {
                         </div>
                         
                         {/* Message content */}
-                        <div className="chat-bubble flex flex-col">
+                        <div className="chat-bubble group relative flex flex-col">
                             {message.image && (
                                 <img 
                                     src={message.image}
@@ -94,6 +95,35 @@ const ChatContainer = () => {
                             {message.content?.type === "sticker" && getStickerById(message.content.value) && (
                                 <img src={getStickerById(message.content.value).src} alt={getStickerById(message.content.value).label} width="160" height="160" className="w-32" />
                             )}
+                            <div className={`absolute top-1/2 z-10 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 ${getReactionButtonPosition(message.senderId === authUser._id)}`}>
+                                <div className="relative">
+                                    <button
+                                        type="button"
+                                        className="btn btn-ghost btn-xs btn-circle border border-base-300 bg-base-100 shadow-sm"
+                                        aria-label="Add reaction"
+                                        aria-expanded={reactionPickerMessageId === message._id}
+                                        title="Add reaction"
+                                        onClick={() => setReactionPickerMessageId((currentId) => currentId === message._id ? null : message._id)}
+                                    >
+                                        <Smile size={16} aria-hidden="true" />
+                                    </button>
+                                    {reactionPickerMessageId === message._id && (
+                                        <div className={`absolute bottom-full z-10 mb-2 flex gap-1 rounded-box border border-base-300 bg-base-100 p-1 shadow-lg ${message.senderId === authUser._id ? "right-0" : "left-0"}`}>
+                                            {REACTION_EMOTES.filter(({ value }) => !message.reactions?.some((reaction) => reaction.emoji === value)).map((reaction) => (
+                                                <button
+                                                    key={reaction.value}
+                                                    type="button"
+                                                    className="btn btn-ghost btn-sm"
+                                                    aria-label={`React with ${reaction.label}`}
+                                                    onClick={() => handleReaction(message._id, reaction.value)}
+                                                >
+                                                    {reaction.value}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                         <div className="chat-footer relative mt-1 flex flex-wrap items-center gap-1">
                             {message.reactions?.map((reaction) => (
@@ -109,30 +139,6 @@ const ChatContainer = () => {
                                     <span>{reaction.userIds.length}</span>
                                 </button>
                             ))}
-                            <button
-                                type="button"
-                                className="btn btn-ghost btn-xs btn-circle border border-base-300"
-                                aria-label="Add reaction"
-                                aria-expanded={reactionPickerMessageId === message._id}
-                                onClick={() => setReactionPickerMessageId((currentId) => currentId === message._id ? null : message._id)}
-                            >
-                                +
-                            </button>
-                            {reactionPickerMessageId === message._id && (
-                                <div className="absolute bottom-8 z-10 flex gap-1 rounded-box border border-base-300 bg-base-100 p-1 shadow-lg">
-                                    {REACTION_EMOTES.filter(({ value }) => !message.reactions?.some((reaction) => reaction.emoji === value)).map((reaction) => (
-                                        <button
-                                            key={reaction.value}
-                                            type="button"
-                                            className="btn btn-ghost btn-sm"
-                                            aria-label={`React with ${reaction.label}`}
-                                            onClick={() => handleReaction(message._id, reaction.value)}
-                                        >
-                                            {reaction.value}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
                         </div>
                     </div>
                 ))}

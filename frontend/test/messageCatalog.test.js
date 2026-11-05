@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { EMOTES, MESSAGE_PICKER_CLASS_NAME, REACTION_EMOTES, STICKERS, applyPendingReactionUpdates, appendEmoteToText, getStickerById, hasReacted, isMessageInConversation, replaceMessage, replaceMessageIfNewer } from "../src/constants/messageCatalog.js";
+import { EMOTES, MESSAGE_PICKER_CLASS_NAME, REACTION_EMOTES, STICKERS, applyPendingReactionUpdates, appendEmoteToText, getReactionButtonPosition, getStickerById, hasReacted, isMessageInConversation, replaceMessage, replaceMessageIfNewer } from "../src/constants/messageCatalog.js";
 
 test("provides a built-in emote and stable unique sticker IDs", () => {
     assert.equal(EMOTES.some(({ value }) => value === "😀"), true);
@@ -60,4 +60,9 @@ test("merges a reaction update that arrived before message history", () => {
     const pendingUpdate = { _id: "message-1", reactions: [{ emoji: "👍", userIds: ["user-a", "user-b"] }], updatedAt: "2026-11-05T10:01:00.000Z" };
 
     assert.deepEqual(applyPendingReactionUpdates([historyMessage], { "message-1": pendingUpdate }), [pendingUpdate]);
+});
+
+test("places the reaction control outside the opposite side of each message", () => {
+    assert.equal(getReactionButtonPosition(false), "left-full ml-2");
+    assert.equal(getReactionButtonPosition(true), "right-full mr-2");
 });

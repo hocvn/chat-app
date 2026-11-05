@@ -54,3 +54,7 @@ export const isMessageInConversation = (message, authUserId, selectedUserId) => 
     (message.senderId === authUserId && message.receiverId === selectedUserId)
     || (message.senderId === selectedUserId && message.receiverId === authUserId)
 );
+
+export const getReactionButtonPosition = (isOwnMessage) => (
+    isOwnMessage ? "right-full mr-2" : "left-full ml-2"
+);
