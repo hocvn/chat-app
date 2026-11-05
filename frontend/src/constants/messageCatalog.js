@@ -43,6 +43,13 @@ export const replaceMessageIfNewer = (messages, updatedMessage) => {
     return messages;
 };
 
+export const applyPendingReactionUpdates = (messages, pendingUpdates) => (
+    Object.values(pendingUpdates).reduce(
+        (updatedMessages, pendingUpdate) => replaceMessageIfNewer(updatedMessages, pendingUpdate),
+        messages,
+    )
+);
+
 export const isMessageInConversation = (message, authUserId, selectedUserId) => (
     (message.senderId === authUserId && message.receiverId === selectedUserId)
     || (message.senderId === selectedUserId && message.receiverId === authUserId)

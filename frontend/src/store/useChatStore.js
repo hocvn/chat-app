@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import toast from 'react-hot-toast'; 
 import { axiosInstance } from '../lib/axios';
 import { useAuthStore } from './useAuthStore';
-import { isMessageInConversation, replaceMessageIfNewer } from '../constants/messageCatalog';
+import { applyPendingReactionUpdates, isMessageInConversation, replaceMessageIfNewer } from '../constants/messageCatalog';
 
 export const useChatStore = create((set, get) => ({
     messages: [],
@@ -10,6 +10,7 @@ export const useChatStore = create((set, get) => ({
     selectedUser: null,
     isUserLoading: false,
     isMessageLoading: false,
+    pendingReactionUpdates: {},
 
     getUsers: async() => {
         set({ isUserLoading: true });
@@ -29,7 +30,15 @@ export const useChatStore = create((set, get) => ({
         set({ isMessageLoading: true });
         try {
             const res = await axiosInstance.get(`/messages/${userId}`);
-            set({ messages: res.data });
+            set((state) => {
+                const pendingReactionUpdates = { ...state.pendingReactionUpdates };
+                res.data.forEach((message) => delete pendingReactionUpdates[message._id]);
+
+                return {
+                    messages: applyPendingReactionUpdates(res.data, state.pendingReactionUpdates),
+                    pendingReactionUpdates,
+                };
+            });
         } catch (error) {
             toast.error('Failed to fetch messages');
             console.log(error);
@@ -76,7 +85,15 @@ export const useChatStore = create((set, get) => ({
             const { authUser } = useAuthStore.getState();
             if (!selectedUser || !authUser || !isMessageInConversation(updatedMessage, authUser._id, selectedUser._id)) return;
 
-            set((state) => ({ messages: replaceMessageIfNewer(state.messages, updatedMessage) }));
+            set((state) => {
+                const messageExists = state.messages.some((message) => message._id === updatedMessage._id);
+                return {
+                    messages: replaceMessageIfNewer(state.messages, updatedMessage),
+                    pendingReactionUpdates: messageExists
+                        ? state.pendingReactionUpdates
+                        : { ...state.pendingReactionUpdates, [updatedMessage._id]: updatedMessage },
+                };
+            });
         });
     },
 

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { EMOTES, MESSAGE_PICKER_CLASS_NAME, REACTION_EMOTES, STICKERS, appendEmoteToText, getStickerById, hasReacted, isMessageInConversation, replaceMessage, replaceMessageIfNewer } from "../src/constants/messageCatalog.js";
+import { EMOTES, MESSAGE_PICKER_CLASS_NAME, REACTION_EMOTES, STICKERS, applyPendingReactionUpdates, appendEmoteToText, getStickerById, hasReacted, isMessageInConversation, replaceMessage, replaceMessageIfNewer } from "../src/constants/messageCatalog.js";
 
 test("provides a built-in emote and stable unique sticker IDs", () => {
     assert.equal(EMOTES.some(({ value }) => value === "😀"), true);
@@ -53,4 +53,11 @@ test("does not replace a newer reaction update with an older snapshot", () => {
     const staleMessage = { _id: "message-1", reactions: [{ emoji: "👍", userIds: ["user-a"] }], updatedAt: "2026-11-05T10:00:00.000Z" };
 
     assert.deepEqual(replaceMessageIfNewer([currentMessage], staleMessage), [currentMessage]);
+});
+
+test("merges a reaction update that arrived before message history", () => {
+    const historyMessage = { _id: "message-1", reactions: [{ emoji: "👍", userIds: ["user-a"] }], updatedAt: "2026-11-05T10:00:00.000Z" };
+    const pendingUpdate = { _id: "message-1", reactions: [{ emoji: "👍", userIds: ["user-a", "user-b"] }], updatedAt: "2026-11-05T10:01:00.000Z" };
+
+    assert.deepEqual(applyPendingReactionUpdates([historyMessage], { "message-1": pendingUpdate }), [pendingUpdate]);
 });
