@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import toast from 'react-hot-toast'; 
 import { axiosInstance } from '../lib/axios';
 import { useAuthStore } from './useAuthStore';
+import { isMessageInConversation, replaceMessage } from '../constants/messageCatalog';
 
 export const useChatStore = create((set, get) => ({
     messages: [],
@@ -48,6 +49,16 @@ export const useChatStore = create((set, get) => ({
         }   
     },
 
+    toggleReaction: async(messageId, emoji) => {
+        try {
+            const res = await axiosInstance.post(`/messages/${messageId}/reactions`, { emoji });
+            set({ messages: replaceMessage(get().messages, res.data) });
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    },
+
     subcribeToMessages:() => {
         const { selectedUser } = get();
         if (!selectedUser) return;
@@ -59,11 +70,20 @@ export const useChatStore = create((set, get) => ({
             
             set({ messages: [...get().messages, newMessage] });
         })
+
+        socket.on('messageReactionUpdated', (updatedMessage) => {
+            const { selectedUser, messages } = get();
+            const { authUser } = useAuthStore.getState();
+            if (!selectedUser || !authUser || !isMessageInConversation(updatedMessage, authUser._id, selectedUser._id)) return;
+
+            set({ messages: replaceMessage(messages, updatedMessage) });
+        });
     },
 
     unsubscribeFromMessages: () => {
         const socket = useAuthStore.getState().socket;
         socket.off('newMessage');
+        socket.off('messageReactionUpdated');
     },
     
     setSelectedUser: (selectedUser) => set({ selectedUser }),

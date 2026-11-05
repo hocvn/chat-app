@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { EMOTES, MESSAGE_PICKER_CLASS_NAME, STICKERS, appendEmoteToText, getStickerById } from "../src/constants/messageCatalog.js";
+import { EMOTES, MESSAGE_PICKER_CLASS_NAME, REACTION_EMOTES, STICKERS, appendEmoteToText, getStickerById, hasReacted, isMessageInConversation, replaceMessage } from "../src/constants/messageCatalog.js";
 
 test("provides a built-in emote and stable unique sticker IDs", () => {
     assert.equal(EMOTES.some(({ value }) => value === "😀"), true);
@@ -25,4 +25,25 @@ test("anchors the message picker inside the composer at the right edge", () => {
 test("appends an emote to composer text", () => {
     assert.equal(appendEmoteToText("Hello ", "😀"), "Hello 😀");
     assert.equal(appendEmoteToText("", "😀"), "😀");
+});
+
+test("provides the fixed reaction set", () => {
+    assert.deepEqual(REACTION_EMOTES.map(({ value }) => value), ["👍", "❤️", "😂", "😮", "🎉"]);
+});
+
+test("identifies whether a user has reacted", () => {
+    assert.equal(hasReacted({ emoji: "👍", userIds: ["user-a"] }, "user-a"), true);
+    assert.equal(hasReacted({ emoji: "👍", userIds: ["user-a"] }, "user-b"), false);
+});
+
+test("replaces only the matching message after a reaction update", () => {
+    assert.deepEqual(
+        replaceMessage([{ _id: "a" }, { _id: "b" }], { _id: "b", reactions: [] }),
+        [{ _id: "a" }, { _id: "b", reactions: [] }],
+    );
+});
+
+test("limits reaction updates to the active two-person conversation", () => {
+    assert.equal(isMessageInConversation({ senderId: "user-a", receiverId: "user-b" }, "user-a", "user-b"), true);
+    assert.equal(isMessageInConversation({ senderId: "user-a", receiverId: "user-c" }, "user-a", "user-b"), false);
 });
